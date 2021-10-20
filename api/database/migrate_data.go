@@ -51,7 +51,7 @@ func (store *Store) MigrateData(force bool) error {
 }
 
 // FailSafeMigrate backup and restore DB if migration fail
-func (store *Store)  FailSafeMigrate(migrator *migrator.Migrator) error {
+func (store *Store) FailSafeMigrate(migrator *migrator.Migrator) error {
 	defer func() {
 		if err := recover(); err != nil {
 			migrateLog.Info(fmt.Sprintf("Error during migration, recovering [%v]", err))
@@ -64,7 +64,7 @@ func (store *Store)  FailSafeMigrate(migrator *migrator.Migrator) error {
 // MigrateData automatically migrate the data based on the DBVersion.
 // This process is only triggered on an existing database, not if the database was just created.
 // if force is true, then migrate regardless.
-func (store *Store)  connectionMigrateData(migratorParams *migrator.MigratorParameters, force bool) error {
+func (store *Store) connectionMigrateData(migratorParams *migrator.MigratorParameters, force bool) error {
 	migrator := migrator.NewMigrator(migratorParams, store.connection)
 
 	// backup db file before upgrading DB to support rollback
@@ -93,7 +93,7 @@ func (store *Store)  connectionMigrateData(migratorParams *migrator.MigratorPara
 }
 
 // backupVersion will backup the database or panic if any errors occur
-func (store *Store)  backupVersion(migrator *migrator.Migrator) error {
+func (store *Store) backupVersion(migrator *migrator.Migrator) error {
 	migrateLog.Info("Backing up database prior to version upgrade...")
 
 	options := getBackupRestoreOptions(store.commonBackupDir())

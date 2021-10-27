@@ -40,25 +40,38 @@ func (store *Store) Open() error {
 		return err
 	}
 
+	// This creates the accessor structures, and should not mutate the data in any way
 	err = store.initServices()
 	if err != nil {
 		return err
 	}
 
 	// if we have DBVersion in the database then ensure we flag this as NOT a new store
-	if _, err := store.VersionService.DBVersion(); err == nil {
+	if version, err := store.VersionService.DBVersion(); err == nil {
 		store.isNew = false
+		logrus.WithField("version", version).Infof("Opened existing store")
 	} else {
-		// its new, lets see if there's an import.yml file, and if there is, import it
-		importFile := "/data/import.json"
-		if exists, _ := store.fileService.FileExists(importFile); exists {
-			if err := store.Import(importFile); err != nil {
-				logrus.WithError(err).Debugf("import %s failed", importFile)
+		if err.Error() == "encrypted string too short" {
+			// TODO: this is a magic string in boltdb/json.go
+			// TODO: reopen without passphrase, then resave with encryption?
+			logrus.WithError(err).Debugf("open db failed - seems its not encrypted?")
+			return err
+		}
+		if store.IsErrObjectNotFound(err) {
+			// its new, lets see if there's an import.yml file, and if there is, import it
+			importFile := "/data/import.json"
+			if exists, _ := store.fileService.FileExists(importFile); exists {
+				if err := store.Import(importFile); err != nil {
+					logrus.WithError(err).Debugf("import %s failed", importFile)
 
-				// TODO: should really rollback on failure, but then we have nothing.
-			} else {
-				logrus.Printf("Successfully imported %s to new portainer database", importFile)
+					// TODO: should really rollback on failure, but then we have nothing.
+				} else {
+					logrus.Printf("Successfully imported %s to new portainer database", importFile)
+				}
 			}
+		} else {
+			logrus.WithError(err).Debugf("open db failed")
+			return err
 		}
 	}
 

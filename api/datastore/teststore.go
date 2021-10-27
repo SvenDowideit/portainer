@@ -1,11 +1,12 @@
 package datastore
 
 import (
-	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/database"
 	"io/ioutil"
 	"log"
 	"os"
+
+	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/database"
 
 	"github.com/pkg/errors"
 	"github.com/portainer/portainer/api/filesystem"
@@ -41,7 +42,8 @@ func NewTestStore(init bool) (*Store, func(), error) {
 		return nil, nil, err
 	}
 
-	connection, err := database.NewDatabase("boltdb", storePath)
+	// TODO: add the UX to get the key from somewhere we consider "safe"
+	connection, err := database.NewDatabase("boltdb", storePath, "apassphrasewhichneedstobe32bytes")
 	if err != nil {
 		panic(err)
 	}

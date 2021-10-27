@@ -3,12 +3,13 @@ package main
 import (
 	"context"
 	"fmt"
-	"github.com/portainer/portainer/api/datastore"
 	"log"
 	"os"
 	"path"
 	"strings"
 	"time"
+
+	"github.com/portainer/portainer/api/datastore"
 
 	"github.com/portainer/portainer/api/database"
 	"github.com/sirupsen/logrus"
@@ -64,7 +65,9 @@ func initFileService(dataStorePath string) portainer.FileService {
 }
 
 func initDataStore(storePath string, rollback bool, fileService portainer.FileService, shutdownCtx context.Context) dataservices.DataStore {
-	connection, err := database.NewDatabase("boltdb", storePath)
+	// TODO: the passphrase needs to come from somewhere external to Portainer
+	// Docker Swarm secret, k8s secret, and for plain Docker - on the filesystem?
+	connection, err := database.NewDatabase("boltdb", storePath, "apassphrasewhichneedstobe32bytes")
 	if err != nil {
 		panic(err)
 	}
@@ -465,6 +468,11 @@ func buildServer(flags *portainer.CLIFlags) portainer.Server {
 	if err != nil {
 		log.Fatalf("failed getting instance id: %v", err)
 	}
+	dbVersion, err := dataStore.Version().DBVersion()
+	if err != nil {
+		log.Fatalf("failed getting db version: %v", err)
+	}
+	logrus.WithField("instanceID", instanceID).WithField("dbVersion", dbVersion).Infof("started with valid store")
 
 	dockerClientFactory := initDockerClientFactory(digitalSignatureService, reverseTunnelService)
 	kubernetesClientFactory := initKubernetesClientFactory(digitalSignatureService, reverseTunnelService, instanceID, dataStore)

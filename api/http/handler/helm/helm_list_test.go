@@ -7,6 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/portainer/portainer/api/datastore"
+
 	"github.com/portainer/libhelm/binary/test"
 	"github.com/portainer/libhelm/options"
 	"github.com/portainer/libhelm/release"
@@ -15,18 +17,17 @@ import (
 	"github.com/portainer/portainer/api/kubernetes"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/portainer/portainer/api/bolt"
 	helper "github.com/portainer/portainer/api/internal/testhelpers"
 )
 
 func Test_helmList(t *testing.T) {
-	store, teardown := bolt.MustNewTestStore(true)
+	_, store, teardown := datastore.MustNewTestStore(true)
 	defer teardown()
 
-	err := store.Endpoint().CreateEndpoint(&portainer.Endpoint{ID: 1})
+	err := store.Endpoint().Create(&portainer.Endpoint{ID: 1})
 	assert.NoError(t, err, "error creating environment")
 
-	err = store.User().CreateUser(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
+	err = store.User().Create(&portainer.User{Username: "admin", Role: portainer.AdministratorRole})
 	assert.NoError(t, err, "error creating a user")
 
 	kubernetesDeployer := exectest.NewKubernetesDeployer()

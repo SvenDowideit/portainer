@@ -13,6 +13,7 @@ import (
 	"github.com/portainer/libhttp/request"
 	"github.com/portainer/libhttp/response"
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/filesystem"
 	"github.com/portainer/portainer/api/internal/edge"
 )
@@ -157,7 +158,7 @@ func (handler *Handler) createSwarmStackFromFileContent(r *http.Request) (*porta
 		return nil, fmt.Errorf("Unable to update endpoint relations: %w", err)
 	}
 
-	err = handler.DataStore.EdgeStack().CreateEdgeStack(stack)
+	err = handler.DataStore.EdgeStack().Create(stack)
 	if err != nil {
 		return nil, err
 	}
@@ -272,7 +273,7 @@ func (handler *Handler) createSwarmStackFromGitRepository(r *http.Request) (*por
 		return nil, fmt.Errorf("Unable to update endpoint relations: %w", err)
 	}
 
-	err = handler.DataStore.EdgeStack().CreateEdgeStack(stack)
+	err = handler.DataStore.EdgeStack().Create(stack)
 	if err != nil {
 		return nil, err
 	}
@@ -379,7 +380,7 @@ func (handler *Handler) createSwarmStackFromFileUpload(r *http.Request) (*portai
 		return nil, fmt.Errorf("Unable to update endpoint relations: %w", err)
 	}
 
-	err = handler.DataStore.EdgeStack().CreateEdgeStack(stack)
+	err = handler.DataStore.EdgeStack().Create(stack)
 	if err != nil {
 		return nil, err
 	}
@@ -402,7 +403,7 @@ func (handler *Handler) validateUniqueName(name string) error {
 }
 
 // updateEndpointRelations adds a relation between the Edge Stack to the related environments(endpoints)
-func updateEndpointRelations(endpointRelationService portainer.EndpointRelationService, edgeStackID portainer.EdgeStackID, relatedEndpointIds []portainer.EndpointID) error {
+func updateEndpointRelations(endpointRelationService dataservices.EndpointRelationService, edgeStackID portainer.EdgeStackID, relatedEndpointIds []portainer.EndpointID) error {
 	for _, endpointID := range relatedEndpointIds {
 		relation, err := endpointRelationService.EndpointRelation(endpointID)
 		if err != nil {

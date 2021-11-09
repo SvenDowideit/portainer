@@ -7,14 +7,14 @@ import (
 
 	httperror "github.com/portainer/libhttp/error"
 	portainer "github.com/portainer/portainer/api"
-	bolterrors "github.com/portainer/portainer/api/bolt/errors"
+	"github.com/portainer/portainer/api/dataservices"
 	httperrors "github.com/portainer/portainer/api/http/errors"
 )
 
 type (
 	// RequestBouncer represents an entity that manages API request accesses
 	RequestBouncer struct {
-		dataStore  portainer.DataStore
+		dataStore  dataservices.DataStore
 		jwtService portainer.JWTService
 	}
 
@@ -29,7 +29,7 @@ type (
 )
 
 // NewRequestBouncer initializes a new RequestBouncer
-func NewRequestBouncer(dataStore portainer.DataStore, jwtService portainer.JWTService) *RequestBouncer {
+func NewRequestBouncer(dataStore dataservices.DataStore, jwtService portainer.JWTService) *RequestBouncer {
 	return &RequestBouncer{
 		dataStore:  dataStore,
 		jwtService: jwtService,
@@ -160,7 +160,7 @@ func (bouncer *RequestBouncer) mwCheckPortainerAuthorizations(next http.Handler,
 		}
 
 		_, err = bouncer.dataStore.User().User(tokenData.ID)
-		if err != nil && err == bolterrors.ErrObjectNotFound {
+		if err != nil && bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
 		} else if err != nil {
@@ -214,7 +214,7 @@ func (bouncer *RequestBouncer) mwCheckAuthentication(next http.Handler) http.Han
 		}
 
 		_, err = bouncer.dataStore.User().User(tokenData.ID)
-		if err != nil && err == bolterrors.ErrObjectNotFound {
+		if err != nil && bouncer.dataStore.IsErrObjectNotFound(err) {
 			httperror.WriteError(w, http.StatusUnauthorized, "Unauthorized", httperrors.ErrUnauthorized)
 			return
 		} else if err != nil {

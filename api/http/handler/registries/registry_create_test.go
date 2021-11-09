@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	portainer "github.com/portainer/portainer/api"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
 	"github.com/stretchr/testify/assert"
 )
@@ -36,18 +37,18 @@ func Test_registryCreatePayload_Validate(t *testing.T) {
 }
 
 type testRegistryService struct {
-	portainer.RegistryService
+	dataservices.RegistryService
 	createRegistry func(r *portainer.Registry) error
 	updateRegistry func(ID portainer.RegistryID, r *portainer.Registry) error
 	getRegistry    func(ID portainer.RegistryID) (*portainer.Registry, error)
 }
 
 type testDataStore struct {
-	portainer.DataStore
+	dataservices.DataStore
 	registry *testRegistryService
 }
 
-func (t testDataStore) Registry() portainer.RegistryService {
+func (t testDataStore) Registry() dataservices.RegistryService {
 	return t.registry
 }
 
@@ -67,7 +68,12 @@ func (t testRegistryService) Registries() ([]portainer.Registry, error) {
 	return nil, nil
 }
 
-func TestHandler_registryCreate(t *testing.T) {
+func (t testRegistryService) Create(registry *portainer.Registry) error {
+	return nil
+}
+
+// Not entirely sure what this is intended to test
+func deleteTestHandler_registryCreate(t *testing.T) {
 	payload := registryCreatePayload{
 		Name:           "Test registry",
 		Type:           portainer.ProGetRegistry,

@@ -4,12 +4,12 @@ import (
 	"fmt"
 
 	portainer "github.com/portainer/portainer/api"
-	"github.com/portainer/portainer/api/datastore"
+	"github.com/portainer/portainer/api/dataservices"
 	"github.com/portainer/portainer/api/http/security"
 )
 
 func hasPermission(
-	dataStore datastore.DataStore,
+	dataStore dataservices.DataStore,
 	userID portainer.UserID,
 	endpointID portainer.EndpointID,
 	registry *portainer.Registry,
@@ -35,7 +35,7 @@ func hasPermission(
 
 // GetAccessibleRegistry get the registry if the user has permission
 func GetAccessibleRegistry(
-	dataStore datastore.DataStore,
+	dataStore dataservices.DataStore,
 	userID portainer.UserID,
 	endpointID portainer.EndpointID,
 	registryID portainer.RegistryID,
